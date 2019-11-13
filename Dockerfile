@@ -17,6 +17,7 @@ RUN apt update && apt install -y --no-install-recommends \
     openssl \
     openssh-client \
     ca-certificates \
+    cmake \
     build-essential && \    
     # Clean up
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \

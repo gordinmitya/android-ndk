@@ -40,3 +40,4 @@ RUN mkdir -p /root/.android && \
     while read p; do echo "y" | printf "starting ${p}" && sdkmanager "${p}" > /dev/null && printf "\n"; done < $ANDROID_HOME/packages.txt
 
 WORKDIR /app
+CMD ["/bin/bash"]

@@ -5,7 +5,7 @@ FROM openjdk:9-jdk
 ENV VERSION_SDK_TOOLS=4333796 \
 	ANDROID_HOME=/usr/local/android-sdk-linux \
 	DEBIAN_FRONTEND=nointeractive
-ENV ANDROID_NDK=$ANDROID_HOME:ndk-bundle
+ENV ANDROID_NDK=$ANDROID_HOME/ndk-bundle
 ENV PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
 
 RUN apt update && apt install -y --no-install-recommends \

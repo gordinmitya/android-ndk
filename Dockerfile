@@ -1,16 +1,13 @@
 FROM ubuntu:20.04
 
-# Setup
-
 ENV VERSION_COMMANDLINETOOLS="10406996_latest" \
 	ANDROID_HOME=/usr/local/android-sdk-linux \
 	DEBIAN_FRONTEND=nointeractive
-ENV ANDROID_NDK=$ANDROID_HOME/ndk-bundle
 ENV PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
 
 WORKDIR $ANDROID_HOME
 
-# uses closest mirror
+# Install build deps
 RUN apt update && apt install -y --no-install-recommends \
     wget curl git \
     zip unzip \
@@ -25,7 +22,7 @@ RUN apt update && apt install -y --no-install-recommends \
 
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
 
-# Android commandlinetools
+# Install android commandlinetools
 RUN mkdir -p $ANDROID_HOME/cmdline-tools/latest && \
     chown -R root.root $ANDROID_HOME && \
     wget -q -O commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-$VERSION_COMMANDLINETOOLS.zip && \
@@ -35,7 +32,7 @@ RUN mkdir -p $ANDROID_HOME/cmdline-tools/latest && \
 
 RUN yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-# Install and update Android packages
+# Install and update sdk components from packages.txt
 ADD packages.txt $ANDROID_HOME
 RUN $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --package_file=$ANDROID_HOME/packages.txt
 

@@ -1,44 +1,43 @@
-FROM openjdk:9-jdk
+FROM ubuntu:20.04
 
 # Setup
 
-ENV VERSION_SDK_TOOLS=4333796 \
+ENV VERSION_COMMANDLINETOOLS="10406996_latest" \
 	ANDROID_HOME=/usr/local/android-sdk-linux \
 	DEBIAN_FRONTEND=nointeractive
 ENV ANDROID_NDK=$ANDROID_HOME/ndk-bundle
 ENV PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
 
+WORKDIR $ANDROID_HOME
+
+# uses closest mirror
 RUN apt update && apt install -y --no-install-recommends \
-    wget \
+    wget curl git \
+    zip unzip \
     gradle \
-    bash \
-    curl \
-    git \
     openssl \
-    openssh-client \
-    ca-certificates \
     cmake \
-    build-essential && \    
+    build-essential \
+    openjdk-17-jdk && \  
     # Clean up
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    apt autoremove -y && apt-get clean
+    apt autoremove -y && apt clean
 
-# Android SDK
-RUN mkdir -p $ANDROID_HOME && \
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+
+# Android commandlinetools
+RUN mkdir -p $ANDROID_HOME/cmdline-tools/latest && \
     chown -R root.root $ANDROID_HOME && \
-    wget -q -O sdk.zip http://dl.google.com/android/repository/sdk-tools-linux-$VERSION_SDK_TOOLS.zip && \
-    unzip sdk.zip -d $ANDROID_HOME && \
-    rm -f sdk.zip
+    wget -q -O commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-$VERSION_COMMANDLINETOOLS.zip && \
+    unzip commandlinetools.zip -d /tmp && \
+    mv /tmp/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest && \
+    rm -f commandlinetools.zip
+
+RUN yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
 # Install and update Android packages
-# sdkmanager --package_file=$ANDROID_HOME/packages.txt
-# bug https://issuetracker.google.com/issues/66465833  
 ADD packages.txt $ANDROID_HOME
-ENV SDKMANAGER_OPTS "--add-modules java.se.ee" 
-RUN mkdir -p /root/.android && \
-    touch /root/.android/repositories.cfg && \
-    sdkmanager --update && yes | sdkmanager --licenses && \
-    while read p; do echo "y" | printf "starting ${p}" && sdkmanager "${p}" > /dev/null && printf "\n"; done < $ANDROID_HOME/packages.txt
+RUN $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --package_file=$ANDROID_HOME/packages.txt
 
 WORKDIR /app
 CMD ["/bin/bash"]
